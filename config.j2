@@ -1,0 +1,1 @@
+container{{  range(1,51) | random  }} ansible_host={{  ansible_facts['default_ipv4']['address']  }} ansible_port={{  container_port  }} ansible_user=root ansible_password={{  passwd_container  }}

@@ -1,0 +1,78 @@
+- hosts: localhost
+  vars_prompt:
+  - name: "image_name"
+    prompt: "Enter the image name you want"
+    private: no
+  - name: "passwd_container"
+    prompt: "Enter the password for the container"
+  - name: "dockerfile_location"
+    prompt: "Enter the path for the Dockerfile"
+    private: no
+  - name: "docker_container"
+    prompt: "Enter the docker container name"
+    private: no
+  - name: "inventory_file"
+    prompt: "Enter the inventory file location"
+    private: no
+  - name: "container_port"
+    prompt: "Enter the port number"
+    private: no
+  tasks:
+  - name: "Configure yum for Docker"
+    yum_repository:
+      name: "Docker"
+      description: "Yum repo for Docker"
+      baseurl: "https://download.docker.com/linux/centos/7/x86_64/stable/"
+      enabled: yes
+      gpgcheck: no
+
+  - name: "Install docker"
+    shell: "yum install docker-ce --nobest"
+
+  - name: "Start Docker service"
+    service:
+      name: "docker"
+      state: started
+
+  - name: "Install pip module for docker"
+    pip:
+      name: "docker"
+      state: present
+
+  - name: "Create the Dockerfile"
+    template:
+      src: /task14.2/dockerfile
+      dest: /task14.2/Dockerfile 
+
+  - name: "Creating image from Dockerfile"
+    docker_image:
+      build:
+        path: "{{  dockerfile_location  }}"
+        pull: no
+      name: "{{  image_name  }}"
+      source: "build"
+      state: present
+
+  - name: "Launching the container"
+    docker_container:
+      detach: yes
+      image: "{{  image_name  }}"
+      interactive: yes
+      name: "{{  docker_container  }}"
+      ports:
+      - "{{  container_port  }}:22"
+      state: started
+
+  - name: "Gathering information for container"
+    docker_container_info:
+      name: "{{  docker_container  }}"
+    register: launched_container
+
+  - name: "Retrieving Container IP"
+    debug:
+      var: launched_container.container.NetworkSettings.IPAddress
+
+  - name: "Writing to Inventory File"
+    template:
+      src: "config.j2"
+      dest: "{{  inventory_file  }}" 
