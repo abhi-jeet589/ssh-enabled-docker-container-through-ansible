@@ -1,8 +1,7 @@
 # ssh-enabled-docker-container-through-ansible
 Using this repository you can create a SSH enabled docker container through ansible which can then later be used to configure anything within that container through ansible itself.
 <h1>Steps to use this repository</h1>
-First things first do install ansible on your linux system using the command</br>
-
+First things first do install ansible on your linux system using the command</br></br>
 
 `pip install ansible`</br>
 
